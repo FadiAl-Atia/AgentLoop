@@ -8,8 +8,8 @@ const response = await client.messages.create({
   messages: [{ role: "user", content: "Hello Claude, can you hear me?" }],
 });
 
-for (const res of response.content) {
-  if (res.type == "text") {
-    console.log(JSON.stringify(res, null, 3) + "\n");
+for (const block of response.content) {
+  if (block.type === "text") {
+    console.log(res.text + "\n");
   }
 }
