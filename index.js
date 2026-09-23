@@ -23,7 +23,7 @@ const response1 = await client.messages.create({
 });
 printText(response1);
 
-messages.push({ role: "assistant", content: response_1.content });
+messages.push({ role: "assistant", content: response1.content });
 messages.push({ role: "user", content: "What is my name?" });
 
 const response2 = await client.messages.create({

@@ -1,8 +1,10 @@
 import Anthropic from "@anthropic-ai/sdk";
 
 const client = new Anthropic();
+const MODEL = "claude-sonnet-5";
+const MAX_TOKENS = 4096;
 
-const calculate = function (a, b, operation) {
+const calculate = function ({ a, b, operation }) {
   switch (operation) {
     case "add": {
       return a + b;
@@ -17,11 +19,12 @@ const calculate = function (a, b, operation) {
       return a / b;
     }
     default:
-      return "Please enter a correct operation";
+      console.log("Please enter a correct operation");
+      break;
   }
 };
 
-const calc_tool = {
+const calcTool = {
   name: "calculate",
   description: "This function will be used to perform operation on two numbers",
   input_schema: {
@@ -40,8 +43,8 @@ const calc_tool = {
 };
 
 const response = await client.messages.create({
-  model: "claude-sonnet-5",
-  max_tokens: 4096,
+  model: MODEL,
+  max_tokens: MAX_TOKENS,
   messages: [
     {
       role: "user",
@@ -53,4 +56,4 @@ const response = await client.messages.create({
     "Always use the tool when asked for multiplication, don't do without it.",
 });
 
-console.log(JSON.stringify(response));
+console.log(JSON.stringify(response, null, 2));
