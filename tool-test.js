@@ -51,7 +51,7 @@ const response = await client.messages.create({
       content: "What is 1234 multiplied by 4500?",
     },
   ],
-  tools: [calc_tool],
+  tools: [calcTool],
   system:
     "Always use the tool when asked for multiplication, don't do without it.",
 });
