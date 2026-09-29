@@ -7,12 +7,7 @@ const client = new Anthropic();
 const rl = readline.createInterface({ input, output });
 
 //Config
-const messages: Anthropic.MessageParam[] = [
-  {
-    role: "user",
-    content: "Ask me about my name",
-  },
-];
+const messages: Anthropic.MessageParam[] = [];
 
 const modelConfig = {
   model: "claude-haiku-4-5",
