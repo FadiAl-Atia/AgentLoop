@@ -6,8 +6,19 @@ import { stdin as input, stdout as output } from "node:process";
 const client = new Anthropic();
 const rl = readline.createInterface({ input, output });
 
-//Flag used to stop the agent loop.
-let loopEnd = 1;
+//Config
+const messages: Anthropic.MessageParam[] = [
+  {
+    role: "user",
+    content: "Ask me about my name",
+  },
+];
+
+const modelConfig = {
+  model: "claude-haiku-4-5",
+  max_tokens: 4096,
+  messages: messages,
+};
 
 //Print text of the agent.
 const printText = function (response: any) {
@@ -21,24 +32,18 @@ const printText = function (response: any) {
 /*Messages array that will be used for context, each new message either from user or agent will be pushed here.
 It will follow strict object structure (role, content) required by Claude.
 */
-const messages: Anthropic.MessageParam[] = [
-  {
-    role: "user",
-    content: "Ask me about my name",
-  },
-];
 
 //Welcoming message.
 console.log(
   "Welcome to your conversation with Claude, type (exit) to quit. \n",
 );
 //Agent Loop
-while (loopEnd) {
+while (true) {
   //Ask user for input to start the conversation.
   const userResponse = await rl.question("You: ");
   //Check if the user wants to exit the chat
   if (userResponse == "exit") {
-    loopEnd = 0;
+    break;
   }
   //Push user message to messages array to keep aware of context.
   messages.push({
@@ -47,11 +52,8 @@ while (loopEnd) {
   });
 
   //Agent response.
-  const newResponse: Anthropic.Message = await client.messages.create({
-    model: "claude-haiku-4-5",
-    max_tokens: 4096,
-    messages: messages,
-  });
+  const newResponse: Anthropic.Message =
+    await client.messages.create(modelConfig);
 
   printText(newResponse);
   //Push the agent response aswell to keep aware of context.
