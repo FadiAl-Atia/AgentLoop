@@ -2,11 +2,9 @@ import Anthropic from "@anthropic-ai/sdk";
 import * as readline from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 
-//Client
 const client = new Anthropic();
 const rl = readline.createInterface({ input, output });
 
-//Config
 const messages: Anthropic.MessageParam[] = [];
 
 const modelConfig = {
@@ -16,7 +14,6 @@ const modelConfig = {
     "You are an agent that helps list files that are in a directory, and print content of a file.",
 };
 
-//Print text of the agent.
 const printText = function (response: Anthropic.Message) {
   for (const block of response.content) {
     if (block.type === "text") {
@@ -25,41 +22,39 @@ const printText = function (response: Anthropic.Message) {
   }
 };
 
-/*Messages array that will be used for context, each new message either from user or agent will be pushed here.
-It will follow strict object structure (role, content) required by Claude.
-*/
+async function getUserInput(): Promise<string> {
+  const userResponse = await rl.question("You: ");
+  return userResponse;
+}
 
-//Welcoming message.
 console.log(
   "Welcome to your conversation with Claude, type (exit) to quit. \n",
 );
-//Agent Loop
-while (true) {
-  //Ask user for input to start the conversation.
-  const userResponse = await rl.question("You: ");
-  //Check if the user wants to exit the chat
-  if (userResponse == "exit") {
-    break;
+
+async function harness() {
+  while (true) {
+    const userResponse = await getUserInput();
+    if (userResponse === "exit") {
+      break;
+    }
+    messages.push({
+      role: "user",
+      content: userResponse,
+    });
+
+    const newResponse: Anthropic.Message = await client.messages.create({
+      ...modelConfig,
+      messages: messages,
+    });
+
+    printText(newResponse);
+    messages.push({
+      role: newResponse.role,
+      content: newResponse.content,
+    });
   }
-  //Push user message to messages array to keep aware of context.
-  messages.push({
-    role: "user",
-    content: userResponse,
-  });
-
-  //Agent response.
-  const newResponse: Anthropic.Message = await client.messages.create({
-    ...modelConfig,
-    messages: messages,
-  });
-
-  printText(newResponse);
-  //Push the agent response aswell to keep aware of context.
-  messages.push({
-    role: newResponse.role,
-    content: newResponse.content,
-  });
 }
 
+await harness();
 console.log("\n\n\n Ended.");
 rl.close();
