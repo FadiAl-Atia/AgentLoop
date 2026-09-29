@@ -12,11 +12,12 @@ const messages: Anthropic.MessageParam[] = [];
 const modelConfig = {
   model: "claude-haiku-4-5",
   max_tokens: 4096,
-  messages: messages,
+  system:
+    "You are an agent that helps list files that are in a directory, and print content of a file.",
 };
 
 //Print text of the agent.
-const printText = function (response: any) {
+const printText = function (response: Anthropic.Message) {
   for (const block of response.content) {
     if (block.type === "text") {
       console.log(block.text + "\n");
@@ -47,8 +48,10 @@ while (true) {
   });
 
   //Agent response.
-  const newResponse: Anthropic.Message =
-    await client.messages.create(modelConfig);
+  const newResponse: Anthropic.Message = await client.messages.create({
+    ...modelConfig,
+    messages: messages,
+  });
 
   printText(newResponse);
   //Push the agent response aswell to keep aware of context.
