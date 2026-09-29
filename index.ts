@@ -10,7 +10,7 @@ const rl = readline.createInterface({ input, output });
 let loopEnd = 1;
 
 //Print text of the agent.
-const printText = function (response) {
+const printText = function (response: any) {
   for (const block of response.content) {
     if (block.type === "text") {
       console.log(block.text + "\n");
@@ -21,7 +21,7 @@ const printText = function (response) {
 /*Messages array that will be used for context, each new message either from user or agent will be pushed here.
 It will follow strict object structure (role, content) required by Claude.
 */
-const messages = [
+const messages: Anthropic.MessageParam[] = [
   {
     role: "user",
     content: "Ask me about my name",
@@ -47,7 +47,7 @@ while (loopEnd) {
   });
 
   //Agent response.
-  const newResponse = await client.messages.create({
+  const newResponse: Anthropic.Message = await client.messages.create({
     model: "claude-haiku-4-5",
     max_tokens: 4096,
     messages: messages,
@@ -57,7 +57,7 @@ while (loopEnd) {
   //Push the agent response aswell to keep aware of context.
   messages.push({
     role: newResponse.role,
-    content: newResponse.content[0]?.text,
+    content: newResponse.content,
   });
 }
 

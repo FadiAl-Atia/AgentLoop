@@ -12,5 +12,9 @@
   "license": "ISC",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.128.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "typescript": "^7.0.2"
   }
 }
