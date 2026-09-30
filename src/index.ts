@@ -29,6 +29,25 @@ const modelConfig = {
         required: ["directoryPath"],
       },
     },
+    {
+      name: "read_files",
+      description: "Prints content of a file given.",
+      input_schema: {
+        type: "object",
+        properties: {
+          directoryPath: {
+            type: "string",
+            description:
+              "The absolute or relative path to the current directory that we will list its items.",
+          },
+          fileName: {
+            type: "string",
+            description: "The name of the file whose content will be printed.",
+          },
+        },
+        required: ["directoryPath", "fileName"],
+      },
+    },
   ] as Anthropic.Tool[],
 };
 
