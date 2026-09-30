@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import * as readline from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
+import { listFilesInDirectory } from "./tools/list-files.ts";
 
 const client = new Anthropic();
 const rl = readline.createInterface({ input, output });
@@ -12,6 +13,23 @@ const modelConfig = {
   max_tokens: 4096,
   system:
     "You are an agent that helps list files that are in a directory, and print content of a file.",
+  tools: [
+    {
+      name: "list_files",
+      description: "Lists all files in a given directory",
+      input_schema: {
+        type: "object",
+        properties: {
+          directoryPath: {
+            type: "string",
+            description:
+              "The absolute or relative path to the directory that we will list its files.",
+          },
+        },
+        required: ["directoryPath"],
+      },
+    },
+  ] as Anthropic.Tool[],
 };
 
 const printText = function (response: Anthropic.Message) {
@@ -41,17 +59,22 @@ async function harness() {
       role: "user",
       content: userResponse,
     });
-
-    const newResponse: Anthropic.Message = await client.messages.create({
-      ...modelConfig,
-      messages: messages,
-    });
-
-    printText(newResponse);
-    messages.push({
-      role: newResponse.role,
-      content: newResponse.content,
-    });
+    while (true) {
+      const newResponse: Anthropic.Message = await client.messages.create({
+        ...modelConfig,
+        messages: messages,
+      });
+      messages.push({
+        role: newResponse.role,
+        content: newResponse.content,
+      });
+      if (newResponse.stop_reason !== "tool_use") {
+        printText(newResponse);
+        break;
+      }
+      //if stop_reason was tool_use
+      const listFilesOutput = listFilesInDirectory("");
+    }
   }
 }
 
