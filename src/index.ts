@@ -13,7 +13,7 @@ const modelConfig = {
   model: "claude-haiku-4-5",
   max_tokens: 4096,
   system:
-    "You are an agent that helps list files that are in a directory, and print content of a file.",
+    "You are an agent that helps list files that are in a directory, and print content of a file and fix bugs if asked.",
   tools: [
     {
       name: "list_files",
@@ -32,7 +32,7 @@ const modelConfig = {
     },
     {
       name: "read_files",
-      description: "Prints content of a file given.",
+      description: "Prints content of a file given OR fix bugs if mentioned.",
       input_schema: {
         type: "object",
         properties: {
