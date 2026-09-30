@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import * as readline from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 import { listFilesInDirectory } from "./tools/list-files.ts";
+import { readFileContent } from "./tools/read-file.ts";
 
 const client = new Anthropic();
 const rl = readline.createInterface({ input, output });
@@ -38,14 +39,10 @@ const modelConfig = {
           directoryPath: {
             type: "string",
             description:
-              "The absolute or relative path to the current directory that we will list its items.",
-          },
-          fileName: {
-            type: "string",
-            description: "The name of the file whose content will be printed.",
+              "The absolute or relative path to the directory where the file exists, and it will include the file name.",
           },
         },
-        required: ["directoryPath", "fileName"],
+        required: ["directoryPath"],
       },
     },
   ] as Anthropic.Tool[],
@@ -95,18 +92,41 @@ async function harness() {
 
       for (const block of newResponse.content) {
         if (block.type == "tool_use") {
-          const path = (block.input as { directoryPath: string }).directoryPath;
-          const listFilesOutput = await listFilesInDirectory(path);
-          messages.push({
-            role: "user",
-            content: [
-              {
-                type: "tool_result",
-                tool_use_id: block.id,
-                content: listFilesOutput.join("\n"),
-              },
-            ],
-          });
+          switch (block.name) {
+            case "list_files":
+              const path = (block.input as { directoryPath: string })
+                .directoryPath;
+              const listFilesOutput = await listFilesInDirectory(path);
+              messages.push({
+                role: "user",
+                content: [
+                  {
+                    type: "tool_result",
+                    tool_use_id: block.id,
+                    content: listFilesOutput.join("\n"),
+                  },
+                ],
+              });
+              break;
+            case "read_files":
+              const filePath = (block.input as { directoryPath: string })
+                .directoryPath;
+              const readFileOutput = await readFileContent(filePath);
+              messages.push({
+                role: "user",
+                content: [
+                  {
+                    type: "tool_result",
+                    tool_use_id: block.id,
+                    content: readFileOutput,
+                  },
+                ],
+              });
+              // Code to run if expression matches value2
+              break;
+            default:
+            // Code to run if expression matches none of the above
+          }
         }
       }
     }
