@@ -23,7 +23,7 @@ const modelConfig = {
           directoryPath: {
             type: "string",
             description:
-              "The absolute or relative path to the directory that we will list its files.",
+              "The absolute or relative path to the current directory that we will list its items.",
           },
         },
         required: ["directoryPath"],
@@ -73,7 +73,23 @@ async function harness() {
         break;
       }
       //if stop_reason was tool_use
-      const listFilesOutput = listFilesInDirectory("");
+
+      for (const block of newResponse.content) {
+        if (block.type == "tool_use") {
+          const path = (block.input as { directoryPath: string }).directoryPath;
+          const listFilesOutput = await listFilesInDirectory(path);
+          messages.push({
+            role: "user",
+            content: [
+              {
+                type: "tool_result",
+                tool_use_id: block.id,
+                content: listFilesOutput.join("\n"),
+              },
+            ],
+          });
+        }
+      }
     }
   }
 }
